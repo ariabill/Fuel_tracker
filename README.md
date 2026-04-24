@@ -1,18 +1,13 @@
-# Fuel Tracker
+# Fuel Tracker v12
 
-Έτοιμο για GitHub Pages / Netlify.
+Έτοιμο για GitHub Pages.
 
-## GitHub Pages
-1. Φτιάξε νέο repository στο GitHub, π.χ. `fuel-tracker`.
-2. Ανέβασε **όλα** τα αρχεία αυτού του φακέλου στο repository.
-3. Πήγαινε: Settings → Pages.
-4. Στο “Build and deployment” διάλεξε:
-   - Source: Deploy from a branch
-   - Branch: main
-   - Folder: /root
-5. Save.
-6. Άνοιξε το link που θα σου δώσει το GitHub Pages.
-7. Από Chrome στο κινητό: ⋮ → Add to Home screen / Προσθήκη στην αρχική οθόνη.
+## Τι άλλαξε
+- Νέο app icon.
+- Splash / loading screen στο άνοιγμα.
+- Καλύτερο `manifest.json` για εγκατάσταση σαν app.
+- Βελτιωμένο offline cache με service worker.
 
-## Σημείωση
-Τα δεδομένα αποθηκεύονται στο localStorage της συσκευής/browser.
+## Upload
+Ανέβασε όλα τα αρχεία στο ίδιο repository και πάτα **Commit changes**.
+Μετά άνοιξε το GitHub Pages link και κάνε refresh.
