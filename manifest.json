@@ -1,6 +1,6 @@
 {
-  "name": "Fuel Tracker",
-  "short_name": "Fuel",
+  "name": "Fuel Tracker v13",
+  "short_name": "Fuel v13",
   "description": "Personal nutrition, training and recovery tracker.",
   "start_url": "./",
   "scope": "./",

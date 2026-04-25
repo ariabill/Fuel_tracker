@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Fuel Tracker">
 <link rel="manifest" href="manifest.json">
-<title>Fuel Tracker v12</title>
+<title>Fuel Tracker v13</title>
 <style>
   :root {
     --purple: #534AB7;
@@ -127,6 +127,8 @@
   .entry-kcal { font-size: 15px; font-weight: 700; color: var(--purple); flex-shrink: 0; }
   .entry-del { background: none; border: none; color: var(--text-hint); font-size: 18px; cursor: pointer; padding: 4px; flex-shrink: 0; line-height: 1; }
   .entry-del:active { color: var(--red); }
+  .entry-edit { background: var(--purple-light); border: 1px solid var(--border); color: var(--purple); border-radius: 999px; font-size: 12px; font-weight: 800; cursor: pointer; padding: 5px 8px; flex-shrink: 0; }
+  .entry-edit:active { background: var(--purple); color: #fff; }
 
   /* GOAL TAB */
   .profile-card { background: var(--surface); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(83,74,183,0.06); }
@@ -260,6 +262,10 @@
   .smoothie-btns button { padding:10px; border:none; border-radius:var(--radius-sm); background:var(--purple); color:white; font-family:inherit; font-weight:800; cursor:pointer; }
   .smoothie-btns button.secondary { background:var(--purple-light); color:var(--purple); border:1px solid var(--border); }
   .smoothie-card.collapsed .smoothie-body { display:none; }
+  .run-card.hidden { display:none; }
+  .quick-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 12px; }
+  .quick-actions .custom-card, .quick-actions .smoothie-card { margin-bottom:0; }
+  @media (max-width:360px){ .quick-actions { grid-template-columns:1fr; } }
 
 
   /* METRICS + HISTORY */
@@ -358,14 +364,14 @@
 <body>
 
 <div id="appLoader" class="app-loader">
-  <div class="loader-icon">⚡</div>
+  <div class="loader-icon">🍜</div>
   <div class="loader-title">Fuel Tracker</div>
   <div class="loader-sub">φόρτωση εφαρμογής…</div>
 </div>
 
 
 <div class="topbar">
-  <div class="topbar-title">⚡ Fuel Tracker v12</div>
+  <div class="topbar-title">⚡ Fuel Tracker v13</div>
   <div class="topbar-date" id="dateLabel"></div>
 </div>
 
@@ -410,7 +416,7 @@
       <div class="mode-chip" data-mode="gym" onclick="setDayMode(this)">🏋️ Gym</div>
       <div class="mode-chip" data-mode="run" onclick="setDayMode(this)">🏃 Run</div>
     </div>
-    <div class="run-card">
+    <div class="run-card hidden" id="runCard">
       <div class="run-title"><span>🏃 Τρέξιμο σήμερα</span><span class="run-val" id="runVal">0 km · +0 kcal</span></div>
       <div class="run-grid">
         <button onclick="addRun(5)">5 km</button><button onclick="addRun(10)">10 km</button><button onclick="addRun(15)">15 km</button><button onclick="addRun(20)">20 km</button>
@@ -423,7 +429,36 @@
       <div class="prog-track"><div class="prog-fill" id="waterFill" style="width:0%"></div></div>
       <div class="water-btns" style="margin-top:8px"><button onclick="addWater(250)">+250</button><button onclick="addWater(500)">+500</button><button onclick="addWater(750)">+750</button><button onclick="resetWater()">Reset</button></div>
     </div>
-    <div class="smoothie-card collapsed" id="smoothieCard">
+
+
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Αναζήτηση: φακές, cottage, pizza, peanut butter…" autocomplete="off" oninput="onSearch()" onfocus="onSearch()">
+      <span class="search-icon">🔍</span>
+    </div>
+    <div class="quick-actions">
+<div class="custom-card collapsed" id="customCard">
+      <div class="custom-title"><span>➕ Custom τρόφιμο</span><button class="custom-toggle" onclick="toggleCustomFood()">Άνοιγμα</button></div>
+      <div class="custom-body">
+        <div class="custom-grid">
+          <input id="cfName" placeholder="Όνομα π.χ. προϊόν Lidl">
+          <input id="cfQty" type="number" value="100" min="1" placeholder="ποσότητα g">
+          <input id="cfKcal" type="number" min="0" placeholder="kcal ή κενό=auto">
+        </div>
+        <div class="custom-grid small">
+          <input id="cfProt" type="number" min="0" step="0.1" placeholder="Πρωτεΐνη (g)">
+          <input id="cfCarb" type="number" min="0" step="0.1" placeholder="Υδατ/κες (g)">
+          <input id="cfFat" type="number" min="0" step="0.1" placeholder="Λιπαρά (g)">
+          <input id="cfIron" type="number" min="0" step="0.1" placeholder="Σίδηρος mg">
+          <input id="cfFiber" type="number" min="0" step="0.1" placeholder="Ίνες (g)">
+          <input id="cfSugar" type="number" min="0" step="0.1" placeholder="Ζάχαρη (g)">
+          <input id="cfSatFat" type="number" min="0" step="0.1" placeholder="Κορεσμένα (g)">
+          <input id="cfSodium" type="number" min="0" step="1" placeholder="Νάτριο mg">
+          <button class="custom-add" onclick="addCustomFood()">Add</button>
+        </div>
+        <div class="custom-note">Βάλε τιμές για την ποσότητα που έφαγες. Αν αφήσεις τις kcal κενές, υπολογίζονται αυτόματα από Π/Υ/Λ.</div>
+      </div>
+    </div>
+<div class="smoothie-card collapsed" id="smoothieCard">
       <div class="smoothie-title"><span>🥤 Smoothie builder</span><button class="custom-toggle" onclick="toggleSmoothie()">Άνοιγμα</button></div>
       <div class="smoothie-body">
         <div class="smoothie-grid">
@@ -432,24 +467,30 @@
               <option value="water">Νερό</option>
               <option value="milk">Γάλα 250ml</option>
               <option value="almond">Ρόφημα αμυγδάλου 250ml</option>
+              <option value="oatmilk">Ρόφημα βρώμης 250ml</option>
               <option value="soy">Ρόφημα σόγιας 250ml</option>
               <option value="kefir">Κεφίρ 250ml</option>
             </select>
           </label>
-          <label>Φρούτο
+          <label>Φρούτα
             <select id="smFruit" onchange="updateSmoothiePreview()">
-              <option value="banana">Μπανάνα</option>
-              <option value="strawberry">Φράουλα 150g</option>
+              <option value="banana">1 μπανάνα</option>
+              <option value="banana_strawberry">1 μπανάνα + φράουλες</option>
+              <option value="strawberry">Φράουλες 150g</option>
               <option value="berries">Μούρα 150g</option>
-              <option value="apple">Μήλο</option>
+              <option value="mango">Μάνγκο 150g</option>
+              <option value="apple">1 μήλο</option>
+              <option value="banana_mango">1 μπανάνα + μάνγκο</option>
               <option value="none">Χωρίς φρούτο</option>
             </select>
           </label>
           <label>Πρωτεΐνη
             <select id="smProtein" onchange="updateSmoothiePreview()">
               <option value="none">Χωρίς</option>
-              <option value="whey">Whey 30g</option>
-              <option value="vegan">Vegan protein 30g</option>
+              <option value="protein12">12g πρωτεΐνη</option>
+              <option value="half_scoop">½ scoop / ~12g πρωτεΐνη</option>
+              <option value="whey">1 scoop whey / ~24g πρωτεΐνη</option>
+              <option value="vegan">1 scoop vegan / ~22g πρωτεΐνη</option>
               <option value="skyr">Skyr 150g</option>
               <option value="yogurt">Γιαούρτι 2% 150g</option>
             </select>
@@ -461,10 +502,12 @@
               <option value="peanut">Φυστικοβούτυρο 20g</option>
               <option value="tahini">Ταχίνι 20g</option>
               <option value="honey">Μέλι 15g</option>
+              <option value="chia">Chia 15g</option>
+              <option value="cocoa">Κακάο 10g</option>
             </select>
           </label>
           <label>Όνομα
-            <input id="smName" placeholder="π.χ. post-run smoothie">
+            <input id="smName" placeholder="π.χ. smoothie μπανάνα φράουλα">
           </label>
           <label>Γεύμα
             <select id="smMeal">
@@ -479,10 +522,6 @@
         </div>
       </div>
     </div>
-
-    <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="Αναζήτηση: φακές, cottage, pizza, peanut butter…" autocomplete="off" oninput="onSearch()" onfocus="onSearch()">
-      <span class="search-icon">🔍</span>
     </div>
     <div id="suggestionsBox" class="suggestions" style="display:none"></div>
     <div id="quickPanel" class="quick-panel">
@@ -510,28 +549,7 @@
         <button class="btn-cancel" onclick="closePanel()">Ακύρωση</button>
       </div>
     </div>
-    <div class="custom-card collapsed" id="customCard">
-      <div class="custom-title"><span>➕ Custom τρόφιμο</span><button class="custom-toggle" onclick="toggleCustomFood()">Άνοιγμα</button></div>
-      <div class="custom-body">
-        <div class="custom-grid">
-          <input id="cfName" placeholder="Όνομα π.χ. προϊόν Lidl">
-          <input id="cfQty" type="number" value="100" min="1" placeholder="ποσότητα g">
-          <input id="cfKcal" type="number" min="0" placeholder="kcal ή κενό=auto">
-        </div>
-        <div class="custom-grid small">
-          <input id="cfProt" type="number" min="0" step="0.1" placeholder="Πρωτεΐνη (g)">
-          <input id="cfCarb" type="number" min="0" step="0.1" placeholder="Υδατ/κες (g)">
-          <input id="cfFat" type="number" min="0" step="0.1" placeholder="Λιπαρά (g)">
-          <input id="cfIron" type="number" min="0" step="0.1" placeholder="Σίδηρος mg">
-          <input id="cfFiber" type="number" min="0" step="0.1" placeholder="Ίνες (g)">
-          <input id="cfSugar" type="number" min="0" step="0.1" placeholder="Ζάχαρη (g)">
-          <input id="cfSatFat" type="number" min="0" step="0.1" placeholder="Κορεσμένα (g)">
-          <input id="cfSodium" type="number" min="0" step="1" placeholder="Νάτριο mg">
-          <button class="custom-add" onclick="addCustomFood()">Add</button>
-        </div>
-        <div class="custom-note">Βάλε τιμές για την ποσότητα που έφαγες. Αν αφήσεις τις kcal κενές, υπολογίζονται αυτόματα από Π/Υ/Λ.</div>
-      </div>
-    </div>
+
     <div class="section-label">Σημερινές καταχωρήσεις</div>
     <div id="logList"></div>
     <button class="reset-btn" onclick="resetDay()">🗑 Καθαρισμός ημέρας</button>
@@ -1165,12 +1183,15 @@ function switchTab(name, btn) {
 // ── DAY MODE / WATER / MEALS ──
 function initDayMode() {
   document.querySelectorAll('.mode-chip').forEach(el => el.classList.toggle('sel', el.dataset.mode === dayMode));
+  const rc = document.getElementById('runCard');
+  if (rc) rc.classList.toggle('hidden', dayMode !== 'run');
 }
 function setDayMode(el) {
   document.querySelectorAll('.mode-chip').forEach(i=>i.classList.remove('sel'));
   el.classList.add('sel');
   dayMode = el.dataset.mode;
   localStorage.setItem('nutritionDayMode', dayMode);
+  initDayMode();
   if (profile) calcGoal();
 }
 function selectMeal(el) {
@@ -1242,32 +1263,40 @@ function addCustomFood() {
 // ── SMOOTHIE BUILDER ──
 const SMOOTHIE_ITEMS = {
   base: {
-    water:  {name:'Νερό', kcal:0, prot:0, carb:0, fat:0, iron:0, fiber:0, sugar:0, satFat:0, sodium:0},
-    milk:   {name:'Γάλα', kcal:155, prot:8.0, carb:12.0, fat:8.8, iron:0.1, fiber:0, sugar:12.0, satFat:5.0, sodium:110},
-    almond: {name:'Αμυγδάλου', kcal:45, prot:1.5, carb:2.0, fat:3.0, iron:0.4, fiber:1.0, sugar:0.5, satFat:0.2, sodium:150},
-    soy:    {name:'Σόγιας', kcal:95, prot:8.0, carb:6.0, fat:4.0, iron:1.0, fiber:1.0, sugar:3.0, satFat:0.6, sodium:110},
-    kefir:  {name:'Κεφίρ', kcal:150, prot:8.5, carb:12.0, fat:7.0, iron:0.1, fiber:0, sugar:12.0, satFat:4.5, sodium:120}
+    water:   {name:'Νερό', kcal:0, prot:0, carb:0, fat:0, iron:0, fiber:0, sugar:0, satFat:0, sodium:0},
+    milk:    {name:'Γάλα', kcal:155, prot:8.0, carb:12.0, fat:8.8, iron:0.1, fiber:0, sugar:12.0, satFat:5.0, sodium:110},
+    almond:  {name:'Αμυγδάλου', kcal:45, prot:1.5, carb:2.0, fat:3.0, iron:0.4, fiber:1.0, sugar:0.5, satFat:0.2, sodium:150},
+    oatmilk: {name:'Βρώμης', kcal:115, prot:2.5, carb:16.0, fat:4.0, iron:0.4, fiber:2.0, sugar:7.0, satFat:0.5, sodium:100},
+    soy:     {name:'Σόγιας', kcal:95, prot:8.0, carb:6.0, fat:4.0, iron:1.0, fiber:1.0, sugar:3.0, satFat:0.6, sodium:110},
+    kefir:   {name:'Κεφίρ', kcal:150, prot:8.5, carb:12.0, fat:7.0, iron:0.1, fiber:0, sugar:12.0, satFat:4.5, sodium:120}
   },
   fruit: {
-    banana:     {name:'Μπανάνα', kcal:105, prot:1.3, carb:27.0, fat:0.4, iron:0.3, fiber:3.1, sugar:14.0, satFat:0.1, sodium:1},
-    strawberry: {name:'Φράουλα', kcal:48, prot:1.0, carb:11.5, fat:0.4, iron:0.6, fiber:3.0, sugar:7.0, satFat:0.0, sodium:2},
-    berries:    {name:'Μούρα', kcal:75, prot:1.5, carb:18.0, fat:0.5, iron:0.8, fiber:6.0, sugar:10.0, satFat:0.0, sodium:2},
-    apple:      {name:'Μήλο', kcal:95, prot:0.5, carb:25.0, fat:0.3, iron:0.2, fiber:4.4, sugar:19.0, satFat:0.0, sodium:2},
-    none:       {name:'', kcal:0, prot:0, carb:0, fat:0, iron:0, fiber:0, sugar:0, satFat:0, sodium:0}
+    banana:            {name:'Μπανάνα', kcal:105, prot:1.3, carb:27.0, fat:0.4, iron:0.3, fiber:3.1, sugar:14.0, satFat:0.1, sodium:1},
+    strawberry:        {name:'Φράουλες', kcal:48, prot:1.0, carb:11.5, fat:0.4, iron:0.6, fiber:3.0, sugar:7.0, satFat:0.0, sodium:2},
+    banana_strawberry: {name:'Μπανάνα + φράουλες', kcal:153, prot:2.3, carb:38.5, fat:0.8, iron:0.9, fiber:6.1, sugar:21.0, satFat:0.1, sodium:3},
+    berries:           {name:'Μούρα', kcal:75, prot:1.5, carb:18.0, fat:0.5, iron:0.8, fiber:6.0, sugar:10.0, satFat:0.0, sodium:2},
+    mango:             {name:'Μάνγκο', kcal:90, prot:1.2, carb:22.5, fat:0.6, iron:0.2, fiber:2.4, sugar:20.0, satFat:0.1, sodium:2},
+    apple:             {name:'Μήλο', kcal:95, prot:0.5, carb:25.0, fat:0.3, iron:0.2, fiber:4.4, sugar:19.0, satFat:0.0, sodium:2},
+    banana_mango:      {name:'Μπανάνα + μάνγκο', kcal:195, prot:2.5, carb:49.5, fat:1.0, iron:0.5, fiber:5.5, sugar:34.0, satFat:0.2, sodium:3},
+    none:              {name:'', kcal:0, prot:0, carb:0, fat:0, iron:0, fiber:0, sugar:0, satFat:0, sodium:0}
   },
   protein: {
-    none:   {name:'', kcal:0, prot:0, carb:0, fat:0, iron:0, fiber:0, sugar:0, satFat:0, sodium:0},
-    whey:   {name:'Whey', kcal:120, prot:24.0, carb:3.0, fat:2.0, iron:0.2, fiber:0, sugar:1.5, satFat:1.0, sodium:80},
-    vegan:  {name:'Vegan protein', kcal:115, prot:22.0, carb:3.5, fat:2.0, iron:4.0, fiber:2.0, sugar:1.0, satFat:0.5, sodium:250},
-    skyr:   {name:'Skyr', kcal:90, prot:16.5, carb:5.5, fat:0.3, iron:0.1, fiber:0, sugar:5.0, satFat:0.1, sodium:60},
-    yogurt: {name:'Γιαούρτι 2%', kcal:110, prot:15.5, carb:5.5, fat:3.0, iron:0.1, fiber:0, sugar:5.0, satFat:2.0, sodium:60}
+    none:       {name:'', kcal:0, prot:0, carb:0, fat:0, iron:0, fiber:0, sugar:0, satFat:0, sodium:0},
+    protein12:  {name:'12g πρωτεΐνη', kcal:55, prot:12.0, carb:1.5, fat:0.8, iron:0.1, fiber:0, sugar:0.5, satFat:0.4, sodium:40},
+    half_scoop: {name:'½ scoop protein', kcal:60, prot:12.0, carb:1.5, fat:1.0, iron:0.1, fiber:0, sugar:0.8, satFat:0.5, sodium:40},
+    whey:       {name:'Whey', kcal:120, prot:24.0, carb:3.0, fat:2.0, iron:0.2, fiber:0, sugar:1.5, satFat:1.0, sodium:80},
+    vegan:      {name:'Vegan protein', kcal:115, prot:22.0, carb:3.5, fat:2.0, iron:4.0, fiber:2.0, sugar:1.0, satFat:0.5, sodium:250},
+    skyr:       {name:'Skyr', kcal:90, prot:16.5, carb:5.5, fat:0.3, iron:0.1, fiber:0, sugar:5.0, satFat:0.1, sodium:60},
+    yogurt:     {name:'Γιαούρτι 2%', kcal:110, prot:15.5, carb:5.5, fat:3.0, iron:0.1, fiber:0, sugar:5.0, satFat:2.0, sodium:60}
   },
   extra: {
     none:   {name:'', kcal:0, prot:0, carb:0, fat:0, iron:0, fiber:0, sugar:0, satFat:0, sodium:0},
     oats:   {name:'Βρώμη', kcal:155, prot:6.8, carb:26.5, fat:2.8, iron:1.9, fiber:4.2, sugar:0.4, satFat:0.5, sodium:2},
     peanut: {name:'Φυστικοβούτυρο', kcal:118, prot:5.0, carb:4.0, fat:10.0, iron:0.4, fiber:1.2, sugar:1.8, satFat:2.0, sodium:70},
     tahini: {name:'Ταχίνι', kcal:118, prot:3.4, carb:4.2, fat:10.8, iron:1.8, fiber:1.9, sugar:0.1, satFat:1.5, sodium:7},
-    honey:  {name:'Μέλι', kcal:46, prot:0, carb:12.0, fat:0, iron:0.1, fiber:0, sugar:12.0, satFat:0, sodium:1}
+    honey:  {name:'Μέλι', kcal:46, prot:0, carb:12.0, fat:0, iron:0.1, fiber:0, sugar:12.0, satFat:0, sodium:1},
+    chia:   {name:'Chia', kcal:73, prot:2.5, carb:6.3, fat:4.6, iron:1.2, fiber:5.1, sugar:0.1, satFat:0.5, sodium:2},
+    cocoa:  {name:'Κακάο', kcal:23, prot:2.0, carb:5.8, fat:1.4, iron:1.4, fiber:3.3, sugar:0.2, satFat:0.8, sodium:2}
   }
 };
 function toggleSmoothie() {
@@ -1314,7 +1343,7 @@ function addSmoothie() {
 function quickSmoothie(type) {
   if (type === 'recovery') {
     document.getElementById('smBase').value='milk';
-    document.getElementById('smFruit').value='banana';
+    document.getElementById('smFruit').value='banana_strawberry';
     document.getElementById('smProtein').value='whey';
     document.getElementById('smExtra').value='oats';
     document.getElementById('smMeal').value='Post-run';
@@ -1461,8 +1490,30 @@ function renderLog() {
         <div class="entry-sub">${e.meal||'Snack'} · ${e.qty}${e.unit} · ${e.time} · Π ${e.prot}g · Υ ${e.carb||0}g · Fe ${e.iron}mg</div>
       </div>
       <div class="entry-kcal">${e.kcal}</div>
+      <button class="entry-edit" onclick="editEntry(${e.id})">edit</button>
       <button class="entry-del" onclick="deleteEntry(${e.id})">×</button>
     </div>`).join('');
+}
+
+function editEntry(id) {
+  const e = log.find(x => x.id === id);
+  if (!e) return;
+  const oldQty = Number(e.qty) || 1;
+  const raw = prompt(`Νέα ποσότητα για: ${e.name}`, oldQty);
+  if (raw === null) return;
+  const newQty = parseFloat(String(raw).replace(',', '.'));
+  if (!newQty || newQty <= 0) return;
+  const factor = newQty / oldQty;
+  ['kcal','prot','carb','fat','iron','fiber','sugar','satFat','sodium'].forEach(k => {
+    const val = Number(e[k] || 0) * factor;
+    if (k === 'kcal' || k === 'sodium') e[k] = Math.round(val);
+    else if (k === 'iron') e[k] = Number(val.toFixed(2));
+    else e[k] = Number(val.toFixed(1));
+  });
+  e.qty = newQty;
+  e.time = new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'});
+  localStorage.setItem('nutritionLog_v1', JSON.stringify(log));
+  rebuildTotals(); renderLog(); renderMetrics(); renderHistory();
 }
 function deleteEntry(id) {
   log=log.filter(e=>e.id!==id);

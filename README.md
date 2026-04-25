@@ -1,13 +1,10 @@
-# Fuel Tracker v12
+# Fuel Tracker v13
 
 Έτοιμο για GitHub Pages.
 
-## Τι άλλαξε
-- Νέο app icon.
-- Splash / loading screen στο άνοιγμα.
-- Καλύτερο `manifest.json` για εγκατάσταση σαν app.
-- Βελτιωμένο offline cache με service worker.
-
-## Upload
-Ανέβασε όλα τα αρχεία στο ίδιο repository και πάτα **Commit changes**.
-Μετά άνοιξε το GitHub Pages link και κάνε refresh.
+Αλλαγές v13:
+- νέο ramen icon
+- Run panel μόνο όταν επιλέγεις Run
+- Custom τρόφιμο και Smoothie builder κάτω από αναζήτηση
+- απλό smoothie builder με περισσότερες επιλογές
+- απλό edit καταχώρησης ποσότητας
